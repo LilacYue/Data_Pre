@@ -18,9 +18,15 @@ import numpy as np
 import json
 import uuid
 
+<<<<<<< HEAD
 #from utils.pycocotools.coco import COCO
 #from utils.pycocotools.cocoeval import COCOeval
 #from utils.pycocotools import mask as COCOmask
+=======
+from utils.pycocotools.coco import COCO
+from utils.pycocotools.cocoeval import COCOeval
+from utils.pycocotools import mask as COCOmask
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
 
 class COCODetection(data.Dataset):

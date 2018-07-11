@@ -340,7 +340,11 @@ mbox = {
 }
 
 
+<<<<<<< HEAD
 def build_net(phase, size=300, num_classes=190):
+=======
+def build_net(phase, size=300, num_classes=21):
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     if phase != "test" and phase != "train":
         print("Error: Phase not recognized")
         return

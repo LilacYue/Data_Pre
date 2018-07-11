@@ -10,7 +10,32 @@ if torch.cuda.is_available():
 
 
 class MultiBoxLoss(nn.Module):
+<<<<<<< HEAD
     
+=======
+    """SSD Weighted Loss Function
+    Compute Targets:
+        1) Produce Confidence Target Indices by matching  ground truth boxes
+           with (default) 'priorboxes' that have jaccard index > threshold parameter
+           (default threshold: 0.5).
+        2) Produce localization target by 'encoding' variance into offsets of ground
+           truth boxes and their matched  'priorboxes'.
+        3) Hard negative mining to filter the excessive number of negative examples
+           that comes with using a large number of default bounding boxes.
+           (default negative:positive ratio 3:1)
+    Objective Loss:
+        L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
+        Where, Lconf is the CrossEntropy Loss and Lloc is the SmoothL1 Loss
+        weighted by α which is set to 1 by cross val.
+        Args:
+            c: class confidences,
+            l: predicted boxes,
+            g: ground truth boxes
+            N: number of matched default boxes
+        See: https://arxiv.org/pdf/1512.02325.pdf for more details.
+    """
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
     def __init__(self, num_classes,overlap_thresh,prior_for_matching,bkg_label,neg_mining,neg_pos,neg_overlap,encode_target):
         super(MultiBoxLoss, self).__init__()
@@ -42,6 +67,10 @@ class MultiBoxLoss(nn.Module):
         num = loc_data.size(0)
         num_priors = (priors.size(0))
         num_classes = self.num_classes
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         # match priors (default boxes) and ground truth boxes
         loc_t = torch.Tensor(num, num_priors, 4)
         conf_t = torch.LongTensor(num, num_priors)
@@ -86,6 +115,11 @@ class MultiBoxLoss(nn.Module):
         targets_weighted = conf_t[(pos+neg).gt(0)]
         loss_c = F.cross_entropy(conf_p, targets_weighted, size_average=False)
 
+<<<<<<< HEAD
+=======
+        # Sum of losses: L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         N = num_pos.data.sum()
         loss_l/=N
         loss_c/=N

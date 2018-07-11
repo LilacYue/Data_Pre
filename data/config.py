@@ -6,7 +6,11 @@ home = os.path.expanduser("~")
 ddir = os.path.join(home,"data/VOCdevkit/")
 
 # note: if you used our download scripts, this should be right
+<<<<<<< HEAD
 VOCroot = "/home/sqy/disk/ydata/Det_datasets/VOC_Tank/" # path to VOCdevkit root dir
+=======
+VOCroot = ddir # path to VOCdevkit root dir
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 COCOroot = os.path.join(home,"data/COCO/")
 
 

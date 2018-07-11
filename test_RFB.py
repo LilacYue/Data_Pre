@@ -9,8 +9,13 @@ import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 import numpy as np
 from torch.autograd import Variable
+<<<<<<< HEAD
 from data import VOCroot
 from data import AnnotationTransform, VOCDetection, BaseTransform, VOC_300,VOC_512
+=======
+from data import VOCroot,COCOroot 
+from data import AnnotationTransform, COCODetection, VOCDetection, BaseTransform, VOC_300,VOC_512,COCO_300,COCO_512, COCO_mobile_300
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
 import torch.utils.data as data
 from layers.functions import Detect,PriorBox
@@ -23,9 +28,15 @@ parser.add_argument('-v', '--version', default='RFB_vgg',
                     help='RFB_vgg ,RFB_E_vgg or RFB_mobile version.')
 parser.add_argument('-s', '--size', default='300',
                     help='300 or 512 input size.')
+<<<<<<< HEAD
 parser.add_argument('-nc', '--num_classes', default=190,
                     help='num_classes')
 parser.add_argument('-m', '--trained_model', default='weights/tank/RFB_vgg_VOC_epoches_280.pth',
+=======
+parser.add_argument('-d', '--dataset', default='VOC',
+                    help='VOC or COCO version')
+parser.add_argument('-m', '--trained_model', default='weights/RFB300_80_5.pth',
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--save_folder', default='eval/', type=str,
                     help='Dir to save results')
@@ -34,16 +45,33 @@ parser.add_argument('--cuda', default=True, type=bool,
 parser.add_argument('--retest', default=False, type=bool,
                     help='test cache results')
 args = parser.parse_args()
+<<<<<<< HEAD
 dataset_name ="tank"
 if not os.path.exists(args.save_folder):
     os.mkdir(args.save_folder)
 
 cfg = (VOC_300, VOC_512)[args.size == '512']
+=======
+
+if not os.path.exists(args.save_folder):
+    os.mkdir(args.save_folder)
+
+if args.dataset == 'VOC':
+    cfg = (VOC_300, VOC_512)[args.size == '512']
+else:
+    cfg = (COCO_300, COCO_512)[args.size == '512']
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
 if args.version == 'RFB_vgg':
     from models.RFB_Net_vgg import build_net
 elif args.version == 'RFB_E_vgg':
     from models.RFB_Net_E_vgg import build_net
+<<<<<<< HEAD
+=======
+elif args.version == 'RFB_mobile':
+    from models.RFB_Net_mobile import build_net
+    cfg = COCO_mobile_300
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 else:
     print('Unkown version!')
 
@@ -53,14 +81,23 @@ if not args.cuda:
     priors = priors.cpu()
 
 
+<<<<<<< HEAD
 def test_net(save_folder, net, num_classes,detector, cuda, testset, transform, max_per_image=300, thresh=0.005):
 
     #net = torch.nn.DataParallel(net, device_ids=[1])
+=======
+def test_net(save_folder, net, detector, cuda, testset, transform, max_per_image=300, thresh=0.005):
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
     # dump predictions and assoc. ground truth to text file for now
     num_images = len(testset)
+<<<<<<< HEAD
     num_classes = num_classes
+=======
+    num_classes = (21, 81)[args.dataset == 'COCO']
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     all_boxes = [[[] for _ in range(num_images)]
                  for _ in range(num_classes)]
 
@@ -106,10 +143,17 @@ def test_net(save_folder, net, num_classes,detector, cuda, testset, transform, m
             c_scores = scores[inds, j]
             c_dets = np.hstack((c_bboxes, c_scores[:, np.newaxis])).astype(
                 np.float32, copy=False)
+<<<<<<< HEAD
             #if args.dataset == 'VOC':
             cpu = True
             #else:
             #    cpu = False
+=======
+            if args.dataset == 'VOC':
+                cpu = True
+            else:
+                cpu = False
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
             keep = nms(c_dets, 0.45, force_cpu=cpu)
             keep = keep[:50]
@@ -131,9 +175,12 @@ def test_net(save_folder, net, num_classes,detector, cuda, testset, transform, m
             _t['im_detect'].clear()
             _t['misc'].clear()
 
+<<<<<<< HEAD
         #if i == 40:
             #break
 
+=======
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     with open(det_file, 'wb') as f:
         pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
 
@@ -144,9 +191,14 @@ def test_net(save_folder, net, num_classes,detector, cuda, testset, transform, m
 if __name__ == '__main__':
     # load net
     img_dim = (300,512)[args.size=='512']
+<<<<<<< HEAD
     num_classes = args.num_classes
     net = build_net('test', img_dim, num_classes)    # initialize detector
     
+=======
+    num_classes = (21, 81)[args.dataset == 'COCO']
+    net = build_net('test', img_dim, num_classes)    # initialize detector
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     state_dict = torch.load(args.trained_model)
     # create new OrderedDict that does not contain `module.`
 
@@ -160,12 +212,27 @@ if __name__ == '__main__':
             name = k
         new_state_dict[name] = v
     net.load_state_dict(new_state_dict)
+<<<<<<< HEAD
     
+=======
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     net.eval()
     print('Finished loading model!')
     print(net)
     # load data
+<<<<<<< HEAD
     testset = VOCDetection(VOCroot, [('2007', 'test')], None, AnnotationTransform())
+=======
+    if args.dataset == 'VOC':
+        testset = VOCDetection(
+            VOCroot, [('2007', 'test')], None, AnnotationTransform())
+    elif args.dataset == 'COCO':
+        testset = COCODetection(
+            COCOroot, [('2014', 'minival')], None)
+            #COCOroot, [('2015', 'test-dev')], None)
+    else:
+        print('Only VOC and COCO dataset are supported now!')
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     if args.cuda:
         net = net.cuda()
         cudnn.benchmark = True
@@ -175,6 +242,14 @@ if __name__ == '__main__':
     #top_k = (300, 200)[args.dataset == 'COCO']
     top_k = 200
     detector = Detect(num_classes,0,cfg)
+<<<<<<< HEAD
     save_folder = os.path.join(args.save_folder,dataset_name)
     rgb_means = (104, 117, 123)
     test_net(save_folder, net, args.num_classes,detector, args.cuda, testset,BaseTransform(net.size, rgb_means, (2, 0, 1)),top_k, thresh=0.01)
+=======
+    save_folder = os.path.join(args.save_folder,args.dataset)
+    rgb_means = ((104, 117, 123),(103.94,116.78,123.68))[args.version == 'RFB_mobile']
+    test_net(save_folder, net, detector, args.cuda, testset,
+             BaseTransform(net.size, rgb_means, (2, 0, 1)),
+             top_k, thresh=0.01)
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894

@@ -22,6 +22,7 @@ if sys.version_info[0] == 2:
 else:
     import xml.etree.ElementTree as ET
 
+<<<<<<< HEAD
 ##tank 189+1 labels num loss '31' '105'
 VOC_CLASSES = ('0',
  '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
@@ -47,6 +48,19 @@ VOC_CLASSES = ('0',
 # for making bounding boxes pretty
 COLORS = (255, 0, 0, 128)#, (0, 255, 0, 128), (0, 0, 255, 128),
           #(0, 255, 255, 128), (255, 0, 255, 128), (255, 255, 0, 128))
+=======
+
+VOC_CLASSES = ( '__background__', # always index 0
+    'aeroplane', 'bicycle', 'bird', 'boat',
+    'bottle', 'bus', 'car', 'cat', 'chair',
+    'cow', 'diningtable', 'dog', 'horse',
+    'motorbike', 'person', 'pottedplant',
+    'sheep', 'sofa', 'train', 'tvmonitor')
+
+# for making bounding boxes pretty
+COLORS = ((255, 0, 0, 128), (0, 255, 0, 128), (0, 0, 255, 128),
+          (0, 255, 255, 128), (255, 0, 255, 128), (255, 255, 0, 128))
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
 
 class VOCSegmentation(data.Dataset):
@@ -132,6 +146,7 @@ class AnnotationTransform(object):
         """
         res = np.empty((0,5)) 
         for obj in target.iter('object'):
+<<<<<<< HEAD
             #difficult = int(obj.find('difficult').text) == 1
             #if not self.keep_difficult and difficult:
                 #continue
@@ -153,6 +168,21 @@ class AnnotationTransform(object):
             bndbox[1]=temp_bndbox[1]
             bndbox[2]=temp_bndbox[0]+temp_bndbox[2]
             bndbox[3]=temp_bndbox[1]+temp_bndbox[3]
+=======
+            difficult = int(obj.find('difficult').text) == 1
+            if not self.keep_difficult and difficult:
+                continue
+            name = obj.find('name').text.lower().strip()
+            bbox = obj.find('bndbox')
+
+            pts = ['xmin', 'ymin', 'xmax', 'ymax']
+            bndbox = []
+            for i, pt in enumerate(pts):
+                cur_pt = int(bbox.find(pt).text) - 1
+                # scale height or width
+                #cur_pt = cur_pt / width if i % 2 == 0 else cur_pt / height
+                bndbox.append(cur_pt)
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
             label_idx = self.class_to_ind[name]
             bndbox.append(label_idx)
             res = np.vstack((res,bndbox))  # [xmin, ymin, xmax, ymax, label_ind]
@@ -189,6 +219,7 @@ class VOCDetection(data.Dataset):
         self._annopath = os.path.join('%s', 'Annotations', '%s.xml')
         self._imgpath = os.path.join('%s', 'JPEGImages', '%s.jpg')
         self.ids = list()
+<<<<<<< HEAD
         #print(image_sets)
         for (year, name) in image_sets:
             self._year = year
@@ -203,6 +234,16 @@ class VOCDetection(data.Dataset):
     def __getitem__(self, index):
         img_id = self.ids[index]
         #print(self._annopath % img_id)
+=======
+        for (year, name) in image_sets:
+            self._year = year
+            rootpath = os.path.join(self.root, 'VOC' + year)
+            for line in open(os.path.join(rootpath, 'ImageSets', 'Main', name + '.txt')):
+                self.ids.append((rootpath, line.strip()))
+
+    def __getitem__(self, index):
+        img_id = self.ids[index]
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         target = ET.parse(self._annopath % img_id).getroot()
         img = cv2.imread(self._imgpath % img_id, cv2.IMREAD_COLOR)
         height, width, _ = img.shape
@@ -283,7 +324,11 @@ class VOCDetection(data.Dataset):
     def _get_voc_results_file_template(self):
         filename = 'comp4_det_test' + '_{:s}.txt'
         filedir = os.path.join(
+<<<<<<< HEAD
             self.root, 'results','Main')
+=======
+            self.root, 'results', 'VOC' + self._year, 'Main')
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         if not os.path.exists(filedir):
             os.makedirs(filedir)
         path = os.path.join(filedir, filename)
@@ -309,7 +354,11 @@ class VOCDetection(data.Dataset):
                                 dets[k, 2] + 1, dets[k, 3] + 1))
 
     def _do_python_eval(self, output_dir='output'):
+<<<<<<< HEAD
         rootpath = os.path.join(self.root)
+=======
+        rootpath = os.path.join(self.root, 'VOC' + self._year)
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         name = self.image_set[0][1]
         annopath = os.path.join(
                                 rootpath,
@@ -329,7 +378,11 @@ class VOCDetection(data.Dataset):
             os.mkdir(output_dir)
         for i, cls in enumerate(VOC_CLASSES):
 
+<<<<<<< HEAD
             if cls == '0':
+=======
+            if cls == '__background__':
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
                 continue
 
             filename = self._get_voc_results_file_template().format(cls)
@@ -337,14 +390,19 @@ class VOCDetection(data.Dataset):
                                     filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
                                     use_07_metric=use_07_metric)
             aps += [ap]
+<<<<<<< HEAD
             if ap < 0.7 :
                 print('AP for {} = {:.4f}'.format(cls, ap))
+=======
+            print('AP for {} = {:.4f}'.format(cls, ap))
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
             if output_dir is not None:
                 with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
                     pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
         print('Mean AP = {:.4f}'.format(np.mean(aps)))
         print('~~~~~~~~')
         print('Results:')
+<<<<<<< HEAD
         apss=[]
         for ap in aps:
             apss.append(round(ap,4))
@@ -353,6 +411,10 @@ class VOCDetection(data.Dataset):
         #f3.writelines(np.mean(aps)+":" +apss)
         #fs.close()
         print("/home/sqy/Program/competition/Tank_Det/result_RFB.txt")
+=======
+        for ap in aps:
+            print('{:.3f}'.format(ap))
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         print('{:.3f}'.format(np.mean(aps)))
         print('~~~~~~~~')
         print('')

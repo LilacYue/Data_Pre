@@ -18,6 +18,7 @@ def parse_rec(filename):
     for obj in tree.findall('object'):
         obj_struct = {}
         obj_struct['name'] = obj.find('name').text
+<<<<<<< HEAD
         #obj_struct['pose'] = obj.find('pose').text
         obj_struct['truncated'] = 0
         obj_struct['difficult'] = 0
@@ -30,6 +31,16 @@ def parse_rec(filename):
         obj_struct['bbox'] = [temp_bndbox[0],temp_bndbox[1],
         temp_bndbox[0]+temp_bndbox[2],temp_bndbox[1]+temp_bndbox[3]]
 
+=======
+        obj_struct['pose'] = obj.find('pose').text
+        obj_struct['truncated'] = int(obj.find('truncated').text)
+        obj_struct['difficult'] = int(obj.find('difficult').text)
+        bbox = obj.find('bndbox')
+        obj_struct['bbox'] = [int(bbox.find('xmin').text),
+                              int(bbox.find('ymin').text),
+                              int(bbox.find('xmax').text),
+                              int(bbox.find('ymax').text)]
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         objects.append(obj_struct)
 
     return objects
@@ -105,8 +116,11 @@ def voc_eval(detpath,
     if not os.path.isdir(cachedir):
         os.mkdir(cachedir)
     cachefile = os.path.join(cachedir, 'annots.pkl')
+<<<<<<< HEAD
     if os.path.exists(cachefile):
         os.remove(cachefile)
+=======
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     # read list of images
     with open(imagesetfile, 'r') as f:
         lines = f.readlines()
@@ -117,11 +131,19 @@ def voc_eval(detpath,
         recs = {}
         for i, imagename in enumerate(imagenames):
             recs[imagename] = parse_rec(annopath.format(imagename))
+<<<<<<< HEAD
             #if i % 100 == 0:
                 #print('Reading annotation for {:d}/{:d}'.format(
                     #i + 1, len(imagenames)))
         # save
         #print('Saving cached annotations to {:s}'.format(cachefile))
+=======
+            if i % 100 == 0:
+                print('Reading annotation for {:d}/{:d}'.format(
+                    i + 1, len(imagenames)))
+        # save
+        print('Saving cached annotations to {:s}'.format(cachefile))
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         with open(cachefile, 'wb') as f:
             pickle.dump(recs, f)
     else:
@@ -146,9 +168,13 @@ def voc_eval(detpath,
     detfile = detpath.format(classname)
     with open(detfile, 'r') as f:
         lines = f.readlines()
+<<<<<<< HEAD
     #print(len(lines))
     if len(lines)==0:
         return 0,0,0
+=======
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     splitlines = [x.strip().split(' ') for x in lines]
     image_ids = [x[0] for x in splitlines]
     confidence = np.array([float(x[1]) for x in splitlines])
@@ -157,8 +183,11 @@ def voc_eval(detpath,
         # sort by confidence
     sorted_ind = np.argsort(-confidence)
     sorted_scores = np.sort(-confidence)
+<<<<<<< HEAD
     #print(detfile,sorted_scores)
     #print(BB.size)
+=======
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     BB = BB[sorted_ind, :]
     image_ids = [image_ids[x] for x in sorted_ind]
 

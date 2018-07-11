@@ -11,7 +11,11 @@ import argparse
 import numpy as np
 from torch.autograd import Variable
 import torch.utils.data as data
+<<<<<<< HEAD
 from data import VOCroot, VOC_300, VOC_512,  AnnotationTransform,VOCDetection, detection_collate, BaseTransform, preproc
+=======
+from data import VOCroot, COCOroot, VOC_300, VOC_512, COCO_300, COCO_512, COCO_mobile_300, AnnotationTransform, COCODetection, VOCDetection, detection_collate, BaseTransform, preproc
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 from layers.modules import MultiBoxLoss
 from layers.functions import PriorBox
 import time
@@ -23,8 +27,13 @@ parser.add_argument('-v', '--version', default='RFB_vgg',
                     help='RFB_vgg ,RFB_E_vgg or RFB_mobile version.')
 parser.add_argument('-s', '--size', default='300',
                     help='300 or 512 input size.')
+<<<<<<< HEAD
 parser.add_argument('-nc', '--num_classes', default=190,
                     help='num_classes')
+=======
+parser.add_argument('-d', '--dataset', default='VOC',
+                    help='VOC or COCO dataset')
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 parser.add_argument(
     '--basenet', default='./weights/vgg16_reducedfc.pth', help='pretrained base model')
 parser.add_argument('--jaccard_threshold', default=0.5,
@@ -35,7 +44,11 @@ parser.add_argument('--num_workers', default=8,
                     type=int, help='Number of workers used in dataloading')
 parser.add_argument('--cuda', default=True,
                     type=bool, help='Use cuda to train model')
+<<<<<<< HEAD
 parser.add_argument('--gpus', default=[0,1], type=list, help='gpus')
+=======
+parser.add_argument('--ngpu', default=1, type=int, help='gpus')
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 parser.add_argument('--lr', '--learning-rate',
                     default=4e-3, type=float, help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
@@ -51,6 +64,7 @@ parser.add_argument('--gamma', default=0.1,
                     type=float, help='Gamma update for SGD')
 parser.add_argument('--log_iters', default=True,
                     type=bool, help='Print the loss at each iteration')
+<<<<<<< HEAD
 parser.add_argument('--save_folder', default='./weights/tank/',
                     help='Location to save checkpoint models')
 args = parser.parse_args()
@@ -60,17 +74,44 @@ if not os.path.exists(args.save_folder):
     os.mkdir(args.save_folder)
 train_sets = [('2012', 'trainval')]
 cfg = (VOC_300)
+=======
+parser.add_argument('--save_folder', default='./weights/',
+                    help='Location to save checkpoint models')
+args = parser.parse_args()
+
+
+if not os.path.exists(args.save_folder):
+    os.mkdir(args.save_folder)
+
+if args.dataset == 'VOC':
+    train_sets = [('2007', 'trainval'), ('2012', 'trainval')]
+    cfg = (VOC_300, VOC_512)[args.size == '512']
+else:
+    train_sets = [('2014', 'train'),('2014', 'valminusminival')]
+    cfg = (COCO_300, COCO_512)[args.size == '512']
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 if args.version == 'RFB_vgg':
     from models.RFB_Net_vgg import build_net
 elif args.version == 'RFB_E_vgg':
     from models.RFB_Net_E_vgg import build_net
+<<<<<<< HEAD
+=======
+elif args.version == 'RFB_mobile':
+    from models.RFB_Net_mobile import build_net
+    cfg = COCO_mobile_300
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 else:
     print('Unkown version!')
 
 img_dim = (300,512)[args.size=='512']
 rgb_means = ((104, 117, 123),(103.94,116.78,123.68))[args.version == 'RFB_mobile']
 p = (0.6,0.2)[args.version == 'RFB_mobile']
+<<<<<<< HEAD
 num_classes = args.num_classes
+=======
+num_classes = (21, 81)[args.dataset == 'COCO']
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 batch_size = args.batch_size
 weight_decay = 0.0005
 gamma = 0.1
@@ -122,8 +163,13 @@ else:
         new_state_dict[name] = v
     net.load_state_dict(new_state_dict)
 
+<<<<<<< HEAD
 if len(args.gpus) > 1:
     net = torch.nn.DataParallel(net, device_ids=args.gpus)
+=======
+if args.ngpu > 1:
+    net = torch.nn.DataParallel(net, device_ids=list(range(args.ngpu)))
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
 
 if args.cuda:
     net.cuda()
@@ -147,14 +193,33 @@ def train():
     conf_loss = 0
     epoch = 0 + args.resume_epoch
     print('Loading Dataset...')
+<<<<<<< HEAD
     VOCroot  = "/home/sqy/disk/ydata/Det_datasets/VOC_Tank"
     dataset = VOCDetection(VOCroot, train_sets, preproc(
         img_dim, rgb_means, p), AnnotationTransform())
+=======
+
+    if args.dataset == 'VOC':
+        dataset = VOCDetection(VOCroot, train_sets, preproc(
+            img_dim, rgb_means, p), AnnotationTransform())
+    elif args.dataset == 'COCO':
+        dataset = COCODetection(COCOroot, train_sets, preproc(
+            img_dim, rgb_means, p))
+    else:
+        print('Only VOC and COCO are supported now!')
+        return
+
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     epoch_size = len(dataset) // args.batch_size
     max_iter = args.max_epoch * epoch_size
 
     stepvalues_VOC = (150 * epoch_size, 200 * epoch_size, 250 * epoch_size)
+<<<<<<< HEAD
     stepvalues = (stepvalues_VOC)
+=======
+    stepvalues_COCO = (90 * epoch_size, 120 * epoch_size, 140 * epoch_size)
+    stepvalues = (stepvalues_VOC,stepvalues_COCO)[args.dataset=='COCO']
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     print('Training',args.version, 'on', dataset.name)
     step_index = 0
 
@@ -164,8 +229,11 @@ def train():
         start_iter = 0
 
     lr = args.lr
+<<<<<<< HEAD
     #print("lr", len(dataset), args.batch_size)
     #exit()
+=======
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
     for iteration in range(start_iter, max_iter):
         if iteration % epoch_size == 0:
             # create batch iterator
@@ -200,8 +268,11 @@ def train():
         out = net(images)
         # backprop
         optimizer.zero_grad()
+<<<<<<< HEAD
         #print("lr", priors.size(),targets.size(),out.size())
         #exit()
+=======
+>>>>>>> 6544e535e60c169d1904751184fb44cdf61ff894
         loss_l, loss_c = criterion(out, priors, targets)
         loss = loss_l + loss_c
         loss.backward()
